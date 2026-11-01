@@ -14,6 +14,7 @@ import api from "../api";
 import { modules } from "../config/modules";
 import Modal from "./Modal";
 import Field from "./Field";
+import { formatDate, formatDateInput } from "../utils/formatDate";
 
 const singularNames = {
   students: "Student",
@@ -31,25 +32,35 @@ const pretty = (key) =>
     .toLowerCase()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-const display = (value) => {
+const dateColumns = new Set([
+  "DATE_OF_BIRTH",
+  "JOIN_DATE",
+  "START_DATE",
+  "END_DATE",
+  "ENROLLMENT_DATE",
+  "PAYMENT_DATE",
+  "ATTENDANCE_DATE",
+]);
+
+const display = (value, column) => {
   if (value == null || value === "") return "—";
 
-  if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
+  if (dateColumns.has(column)) {
+    return formatDate(value);
   }
 
-  return String(value).replace("T00:00:00.000Z", "").replace("T00:00:00", "");
+  return String(value);
 };
 
 function formatFormValue(value) {
   if (value == null) return "";
 
   if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
+    return formatDateInput(value);
   }
 
   if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
-    return value.slice(0, 10);
+    return formatDateInput(value);
   }
 
   return value;
@@ -71,7 +82,6 @@ export default function ResourcePage({ resource, notify }) {
   const [saving, setSaving] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
 
-  // Load directory records and lookup data
   async function load() {
     setBusy(true);
 
@@ -114,7 +124,6 @@ export default function ResourcePage({ resource, notify }) {
     return () => window.clearTimeout(timer);
   }, [resource, search]);
 
-  // Open create form
   function openCreate() {
     setEditing(null);
     setForm({});
@@ -122,7 +131,6 @@ export default function ResourcePage({ resource, notify }) {
     setModal(true);
   }
 
-  // Open edit form using the latest database record
   async function openEdit(row) {
     const recordId = row[config.id];
 
@@ -137,7 +145,6 @@ export default function ResourcePage({ resource, notify }) {
     setModal(true);
 
     try {
-      // Retrieve the complete record directly from the backend.
       const response = await api.get(`/${resource}/${recordId}`);
 
       const record = response.data?.data;
@@ -146,7 +153,6 @@ export default function ResourcePage({ resource, notify }) {
         throw new Error("The requested record was not returned.");
       }
 
-      // Populate the form using the complete database response.
       const next = {};
 
       config.fields.forEach(([name]) => {
@@ -171,7 +177,6 @@ export default function ResourcePage({ resource, notify }) {
     }
   }
 
-  // Update individual form fields
   const updateField = (name, value) => {
     setForm((current) => ({
       ...current,
@@ -179,7 +184,6 @@ export default function ResourcePage({ resource, notify }) {
     }));
   };
 
-  // Create or update a record
   async function save(event) {
     event.preventDefault();
 
@@ -220,7 +224,6 @@ export default function ResourcePage({ resource, notify }) {
     }
   }
 
-  // Delete a record
   async function remove(row) {
     const recordName =
       row.FULL_NAME ||
@@ -254,9 +257,7 @@ export default function ResourcePage({ resource, notify }) {
       <div className="page-heading">
         <div>
           <p className="eyebrow">ACADEMY MANAGEMENT</p>
-
           <h1 className="page-title">{config.title}</h1>
-
           <p className="page-subtitle">{config.subtitle}</p>
         </div>
 
@@ -311,7 +312,6 @@ export default function ResourcePage({ resource, notify }) {
               disabled={busy}
             >
               <RefreshCw size={14} className={busy ? "animate-spin" : ""} />
-
               <span>Refresh</span>
             </button>
           </div>
@@ -324,7 +324,6 @@ export default function ResourcePage({ resource, notify }) {
                 {config.columns.map((column) => (
                   <th key={column}>{pretty(column)}</th>
                 ))}
-
                 <th className="text-right">Actions</th>
               </tr>
             </thead>
@@ -387,10 +386,10 @@ export default function ResourcePage({ resource, notify }) {
                               row[column] || "",
                             ).toLowerCase()}`}
                           >
-                            {display(row[column])}
+                            {display(row[column], column)}
                           </span>
                         ) : (
-                          display(row[column])
+                          display(row[column], column)
                         )}
                       </td>
                     ))}

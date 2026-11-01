@@ -128,17 +128,43 @@ router.get(
   }),
 );
 
-// Reports
+// Reports: all seven management modules
 router.get(
   "/reports/summary",
   asyncHandler(async (req, res) => {
     const result = await query(`
-      SELECT 'Students' AS CATEGORY, COUNT(*) AS TOTAL FROM STUDENTS
-      UNION ALL SELECT 'Teachers', COUNT(*) FROM TEACHERS
-      UNION ALL SELECT 'Courses', COUNT(*) FROM COURSES
-      UNION ALL SELECT 'Batches', COUNT(*) FROM BATCHES
-      UNION ALL SELECT 'Enrollments', COUNT(*) FROM ENROLLMENTS
-      UNION ALL SELECT 'Payments', COUNT(*) FROM PAYMENTS
+      SELECT 'Students' AS CATEGORY, COUNT(*) AS TOTAL
+      FROM STUDENTS
+
+      UNION ALL
+
+      SELECT 'Teachers', COUNT(*)
+      FROM TEACHERS
+
+      UNION ALL
+
+      SELECT 'Courses', COUNT(*)
+      FROM COURSES
+
+      UNION ALL
+
+      SELECT 'Batches', COUNT(*)
+      FROM BATCHES
+
+      UNION ALL
+
+      SELECT 'Enrollments', COUNT(*)
+      FROM ENROLLMENTS
+
+      UNION ALL
+
+      SELECT 'Payments', COUNT(*)
+      FROM PAYMENTS
+
+      UNION ALL
+
+      SELECT 'Attendance', COUNT(*)
+      FROM ATTENDANCE
     `);
 
     res.json(result.rows);
