@@ -40,7 +40,9 @@ router.get(
   "/lookups/students",
   asyncHandler(async (req, res) => {
     const result = await query(
-      `SELECT STUDENT_ID AS ID, FULL_NAME AS LABEL
+      `SELECT
+         STUDENT_ID AS ID,
+         STUDENT_CODE || ' - ' || FULL_NAME AS LABEL
        FROM STUDENTS
        WHERE STATUS = 'ACTIVE'
        ORDER BY FULL_NAME`,
@@ -55,7 +57,9 @@ router.get(
   "/lookups/teachers",
   asyncHandler(async (req, res) => {
     const result = await query(
-      `SELECT TEACHER_ID AS ID, FULL_NAME AS LABEL
+      `SELECT
+         TEACHER_ID AS ID,
+         FULL_NAME AS LABEL
        FROM TEACHERS
        WHERE STATUS = 'ACTIVE'
        ORDER BY FULL_NAME`,
@@ -70,7 +74,9 @@ router.get(
   "/lookups/courses",
   asyncHandler(async (req, res) => {
     const result = await query(
-      `SELECT COURSE_ID AS ID, COURSE_NAME AS LABEL
+      `SELECT
+         COURSE_ID AS ID,
+         COURSE_NAME AS LABEL
        FROM COURSES
        WHERE STATUS = 'ACTIVE'
        ORDER BY COURSE_NAME`,
@@ -85,10 +91,15 @@ router.get(
   "/lookups/batches",
   asyncHandler(async (req, res) => {
     const result = await query(
-      `SELECT BATCH_ID AS ID, BATCH_NAME AS LABEL
-       FROM BATCHES
-       WHERE STATUS = 'ACTIVE'
-       ORDER BY BATCH_NAME`,
+      `SELECT
+         B.BATCH_ID AS ID,
+         B.BATCH_NAME || ' - ' ||
+         NVL(C.COURSE_NAME, 'No course assigned') AS LABEL
+       FROM BATCHES B
+       LEFT JOIN COURSES C
+         ON B.COURSE_ID = C.COURSE_ID
+       WHERE B.STATUS = 'ACTIVE'
+       ORDER BY B.BATCH_NAME`,
     );
 
     res.json(result.rows);

@@ -90,9 +90,15 @@ export async function list(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 100));
 
+  const from = config.from || config.table;
+  const select = config.select || "*";
+  const orderBy = config.orderBy || config.id;
+
   const result = await query(
-    `SELECT * FROM ${config.table}${where}
-     ORDER BY ${config.id} DESC
+    `SELECT ${select}
+     FROM ${from}
+     ${where}
+     ORDER BY ${orderBy} DESC
      OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`,
     {
       ...binds,
