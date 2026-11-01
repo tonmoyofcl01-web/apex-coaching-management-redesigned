@@ -1,77 +1,123 @@
 # Apex Coaching Management System
 
-A full-stack academic project built with React, Tailwind CSS v4, Express 5 and Oracle Database.
+A web-based coaching center management system built as a university project. It provides a centralized dashboard for managing students, teachers, courses, batches, enrollments, payments, and attendance.
 
-## Requirements
-- Node.js 22.12+ (Node 22 LTS recommended)
-- An existing Oracle Database instance with a PDB/service accessible over TCP (default service in `.env.example`: `FREEPDB1`)
-- SQL Developer or another Oracle SQL client
+## Dashboard Preview
 
-## 1. Configure Oracle without replacing your existing database
+![Apex Coaching Management System Dashboard](assets/dashboard-preview.png)
 
-This project does **not** install, remove, reset, or modify an Oracle database instance. It creates a separate schema named `APEX_CMS_APP` inside the PDB you select.
+## Features
 
-1. Open SQL Developer and connect as an account allowed to create users (normally `SYSTEM`).
-2. Connect to the intended PDB/service, not the CDB root. Confirm it with:
-   ```sql
-   SELECT SYS_CONTEXT('USERENV', 'CON_NAME') AS CONTAINER_NAME FROM DUAL;
-   SELECT name, open_mode FROM v$pdbs;
-   ```
-   If you do not have permission to query `V$PDBS`, use the service name shown in your existing Oracle connection.
-3. Run `database/01_create_app_user.sql` while connected to the intended PDB as `SYSTEM`.
-4. Create a SQL Developer connection using:
-   - Username: `APEX_CMS_APP`
-   - Password: the password you set in the user-creation script
-   - Host: `localhost`
-   - Port: `1521` (unless your listener uses another port)
-   - Service name: your existing PDB service
-5. Connect as `APEX_CMS_APP` and run `database/02_create_tables.sql`.
+- **Dashboard:** Overview of students, teaching staff, courses, active batches, revenue, and outstanding fees.
+- **Student Management:** Create, view, update, and delete student records.
+- **Teacher Management:** Manage teacher information.
+- **Course Management:** Organize the courses offered by the coaching center.
+- **Batch Management:** Manage batches and their schedules.
+- **Enrollment Management:** Register students in batches.
+- **Payment Management:** Record and manage student payments.
+- **Attendance Management:** Maintain student attendance records.
+- **Reports:** View management and financial summaries.
+- **Settings:** Access application settings.
+- **Admin Login:** Protected access to the management dashboard.
 
-**Password note:** The supplied six-digit password `109310` may be rejected by your Oracle profile's password policy. If so, set a stronger password in `01_create_app_user.sql` and use exactly the same value in `backend/.env`. Do not weaken the Oracle profile policy just for this project.
+## Tech Stack
 
-Do not run `DROP USER`, `DROP DATABASE`, `DROP PLUGGABLE DATABASE`, or reinstall Oracle. If `APEX_CMS_APP` already exists, stop and inspect it rather than dropping it.
+| Area | Technology |
+|---|---|
+| Frontend | React, Vite |
+| Styling | Tailwind CSS |
+| Backend | Node.js, Express.js |
+| Database | Oracle Database 23ai Free |
+| Database Driver | `oracledb` |
+| Authentication | JSON Web Token (JWT) |
 
-## 2. Install dependencies
+## Run Locally
 
-From this project root:
+### Prerequisites
+
+- Node.js and npm
+- Oracle Database 23ai Free
+- Oracle SQL Developer (recommended for database connection and management)
+
+### 1. Start the Oracle database
+
+Start your local Oracle Database 23ai Free instance and make sure the `FREEPDB1` service is available.
+
+The application uses the following local connection settings:
+
+- Host: `localhost`
+- Port: `1521`
+- Service: `FREEPDB1`
+- Database user: `APEX_CMS_APP`
+
+### 2. Configure the backend environment
+
+Create a `.env` file in the `backend` directory. Use your own local credentials and a strong, private JWT secret:
+
+```env
+PORT=5000
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
+
+ORACLE_USER=APEX_CMS_APP
+ORACLE_PASSWORD=your_oracle_password
+ORACLE_CONNECT_STRING=localhost:1521/FREEPDB1
+
+JWT_SECRET=replace_with_a_long_random_secret
+JWT_EXPIRES_IN=8h
+```
+
+Do not commit `.env` or real credentials to GitHub.
+
+### 3. Install dependencies
+
+From the project root, install the root dependencies:
 
 ```bash
 npm install
 ```
 
-## 3. Configure backend
+If the frontend and backend dependencies have not already been installed, install them in their respective directories:
 
-Copy `backend/.env.example` to `backend/.env`, then set the host, port, service name, username, password and JWT secret to match your existing Oracle installation.
-
-On Windows CMD:
-```bat
-copy backend\.env.example backend\.env
+```bash
+cd frontend
+npm install
+cd ../backend
+npm install
+cd ..
 ```
 
-On PowerShell:
-```powershell
-Copy-Item backend/.env.example backend/.env
-```
+### 4. Start the application
 
-## 4. Start
+From the project root, run:
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:5173
+This starts the frontend and backend together. Keep the terminal running while using the application.
 
-Default local demo admin:
-- Email: `admin@apexcoaching.com`
-- Password: `Admin@12345`
+### 5. Open the application
 
-The backend creates this admin on startup if it does not already exist. The password is stored as a bcrypt hash. Change it after your first login.
+- **Frontend:** http://localhost:5173/
+- **Backend:** http://localhost:5000/
+- **Backend health check:** http://localhost:5000/api/health
 
-## Available modules
-Dashboard, students, teachers, courses, batches, enrollments, payments, attendance, reports, admin profile and password change.
+## Project Structure
 
-## Notes
-- This is an academic/local demonstration project, not a production deployment.
-- The backend uses Oracle's node-oracledb Thin mode; a separate Oracle Instant Client is not required for supported database versions.
-- Do not expose the backend publicly with the demo JWT secret or demo admin credentials.
-- Database setup scripts are intentionally non-destructive. They create new objects and do not drop existing schemas or tables.
+```text
+apex-coaching-management/
+├── frontend/       # React application
+├── backend/        # Express API and Oracle database integration
+└── package.json    # Root scripts
+```
+
+## Project Scope
+
+This application was developed for an academic university project. It demonstrates full-stack application development, CRUD operations, REST API integration, relational database usage with Oracle, and basic admin authentication.
+
+It is intended for local academic demonstration and is not presented as a production-ready system.
+
+## Security Note
+
+Never publish database passwords, administrator credentials, JWT secrets, or `.env` files. Use your own private credentials when running the project.
