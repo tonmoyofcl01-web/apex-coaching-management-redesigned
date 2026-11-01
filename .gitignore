@@ -1,6 +1,26 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+build/
+
+# Environment variables and secrets
 .env
-.env.local
+.env.*
+!.env.example
+
+# Private credentials
+admin_account.txt
+
+# Logs
 *.log
+npm-debug.log*
+
+# Operating system
 .DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
